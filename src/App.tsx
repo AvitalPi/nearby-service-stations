@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react"
 import "./App.css"
-import ServiceStation from "./ServiceStation"
-import { ServiceStation as ServiceStationType } from "./types"
-import { services } from "./services"
+import ServiceStations from "./ServiceStations"
+import { ServiceStation } from "./types"
+import { services, ServiceName } from "./services"
 
 function App() {
   const [filtersState, setFiltersState] = useState(
@@ -10,16 +10,17 @@ function App() {
   )
   const [coords, setCoords] =
     useState<{ latitude: number; longitude: number }>()
-  const [serviceStationList, setServiceStationList] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [serviceStations, setServiceStations] = useState<ServiceStation[]>([])
+  const [loading, setLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState("")
 
-  const toggleFilter = (filterName: keyof typeof filtersState) =>
+  const toggleFilter = (filterName: ServiceName) =>
     setFiltersState({
       ...filtersState,
       [filterName]: !filtersState[filterName],
     })
 
-  const search = useCallback(() => {
+  const search = useCallback(async () => {
     if (!coords) return
 
     setLoading(true)
@@ -37,27 +38,33 @@ function App() {
       searchParams.append("attributes", attributes.join(","))
     }
 
-    fetch(
-      `https://ravkavonline.co.il/api/pos/service-station/search/?${searchParams}`,
-      {
-        headers: {
-          "Accept-Language": "he",
-        },
-      }
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        setServiceStationList(
-          data.data.results.map(
-            (result: { service_station: ServiceStationType }) =>
-              result.service_station
-          )
+    try {
+      const response = await fetch(
+        `https://ravkavonline.co.il/api/pos/service-station/search/?${searchParams}`,
+        {
+          headers: {
+            "Accept-Language": "he",
+          },
+        }
+      )
+
+      if (!response.ok) throw new Error(response.statusText)
+
+      const data = await response.json()
+
+      if (data.error) throw new Error(data.error)
+
+      setServiceStations(
+        data.data.results.map(
+          (result: { service_station: ServiceStation }) =>
+            result.service_station
         )
-        setLoading(false)
-      })
-      .catch((error) => {
-        console.error(error)
-      })
+      )
+    } catch (error) {
+      setErrorMessage(error)
+    } finally {
+      setLoading(false)
+    }
   }, [coords, filtersState])
 
   useEffect(() => {
@@ -65,7 +72,6 @@ function App() {
       (pos) => {
         const { latitude, longitude } = pos.coords
         setCoords({ latitude, longitude })
-        console.log(pos.coords)
       },
       (err) => {
         console.warn(`ERROR(${err.code}): ${err.message}`)
@@ -104,13 +110,11 @@ function App() {
 
         <div className="stations">
           {loading ? (
-            <div>Loading...</div>
+            <div>טוען...</div>
+          ) : errorMessage ? (
+            <div>שגיאה בקבלת נתונים</div>
           ) : (
-            <ul>
-              {serviceStationList.map((station: ServiceStationType) => (
-                <ServiceStation key={station.id} serviceStation={station} />
-              ))}
-            </ul>
+            <ServiceStations serviceStations={serviceStations} />
           )}
         </div>
       </main>

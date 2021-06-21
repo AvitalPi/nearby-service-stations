@@ -5,4 +5,6 @@ export const services = [
   { name: "sells_ravkav_reader", label: "מוכר קורא כרטיסי רב-קו" },
   { name: "manned", label: "מאויש" },
   { name: "reload_reservation", label: "מימוש טעינה מוזמנת" },
-]
+] as const
+
+export type ServiceName = typeof services[number]["name"]
