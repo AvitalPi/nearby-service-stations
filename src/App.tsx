@@ -9,7 +9,6 @@ function App() {
   const [filtersState, setFiltersState] = useState(
     Object.fromEntries(services.map((filter) => [filter.name, false]))
   )
-  // TODO: Practice custom hooks by factoring-out the `coords` state and `useEffect`
   const [coords, setCoords] =
     useState<{ latitude: number; longitude: number }>()
   const [serviceStations, setServiceStations] = useState<ServiceStation[]>([])
