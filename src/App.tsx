@@ -3,11 +3,13 @@ import "./App.css"
 import ServiceStations from "./ServiceStations"
 import { ServiceStation } from "./types"
 import { services, ServiceName } from "./services"
+import { Filters } from "./Filters"
 
 function App() {
   const [filtersState, setFiltersState] = useState(
     Object.fromEntries(services.map((filter) => [filter.name, false]))
   )
+  // TODO: Practice custom hooks by factoring-out the `coords` state and `useEffect`
   const [coords, setCoords] =
     useState<{ latitude: number; longitude: number }>()
   const [serviceStations, setServiceStations] = useState<ServiceStation[]>([])
@@ -92,21 +94,7 @@ function App() {
     <div className="App">
       <h1>עמדות שירות</h1>
       <main>
-        <aside className="filters">
-          <ul>
-            {services.map((filter) => (
-              <li key={`item_${filter.name}`}>
-                <input
-                  type="checkbox"
-                  id={filter.name}
-                  checked={filtersState[filter.name]}
-                  onChange={() => toggleFilter(filter.name)}
-                />
-                <label htmlFor={filter.name}>{filter.label}</label>
-              </li>
-            ))}
-          </ul>
-        </aside>
+        <Filters filtersState={filtersState} onToggleFilter={toggleFilter} />
 
         <div className="stations">
           {loading ? (
