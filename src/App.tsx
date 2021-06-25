@@ -4,16 +4,17 @@ import ServiceStations from "./ServiceStations"
 import { ServiceStation } from "./types"
 import { services, ServiceName } from "./services"
 import { Filters } from "./Filters"
+import useCoords from "./useCoords"
 
 function App() {
   const [filtersState, setFiltersState] = useState(
     Object.fromEntries(services.map((filter) => [filter.name, false]))
   )
-  const [coords, setCoords] =
-    useState<{ latitude: number; longitude: number }>()
   const [serviceStations, setServiceStations] = useState<ServiceStation[]>([])
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState("")
+
+  const coords = useCoords()
 
   const toggleFilter = (filterName: ServiceName) =>
     setFiltersState({
@@ -67,23 +68,6 @@ function App() {
       setLoading(false)
     }
   }, [coords, filtersState])
-
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords
-        setCoords({ latitude, longitude })
-      },
-      (err) => {
-        console.warn(`ERROR(${err.code}): ${err.message}`)
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 10000,
-      }
-    )
-  }, [])
 
   useEffect(() => {
     if (coords) search()
