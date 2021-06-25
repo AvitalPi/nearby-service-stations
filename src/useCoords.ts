@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
+import { Coords } from "./types"
 
 export default function useCoords() {
-  const [coords, setCoords] =
-    useState<{ latitude: number; longitude: number }>()
+  const [coords, setCoords] = useState<Coords>()
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
