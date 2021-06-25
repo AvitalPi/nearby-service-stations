@@ -7,3 +7,7 @@ export type ServiceStation = {
   comments: string
   operating_company: string
 }
+
+export type Filters = { [k: string]: boolean }
+
+export type Coords = { latitude: number; longitude: number }
